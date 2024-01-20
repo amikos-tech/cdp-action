@@ -54,4 +54,4 @@ runs:
       shell: bash
       run: |
           set -e
-          poetry run ${{ inputs.pipeline }}
+          ${{ inputs.pipeline }}
