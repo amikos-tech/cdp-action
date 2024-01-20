@@ -35,25 +35,19 @@ runs:
       uses: actions/setup-python@v2
       with:
         python-version: '3.9'
-    - name: Install poetry
-      run: |
-        set -e
-        python -m pip install --upgrade pip
-        curl -sSL https://install.python-poetry.org | python3 -
       shell: bash
     - name: Install cdp
       run: |
         set -e
-        poetry config virtualenvs.create false
-        poetry install
+        pip install chromadb-data-pipes
         if [ "${{ inputs.with_embeddings_support }}" = "true" ]; then
-          poetry install --extras "embeddings"
+          pip install chromadb-data-pipes[embeddings]
         fi
         if [ "${{ inputs.with_docs_support }}" = "true" ]; then
-          poetry install --extras "docs"
+          pip install chromadb-data-pipes[docs]
         fi
         if [ "${{ inputs.with_web_support }}" = "true" ]; then
-          poetry install --extras "web"
+          pip install chromadb-data-pipes[web]
         fi
       shell: bash
     - name: Run cdp
