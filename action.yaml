@@ -3,18 +3,62 @@ description: "Import/Export data to/from ChromaDB and much more!"
 inputs:
   pipeline:
     description: |
-        The pipeline to run. Example:
-        `cdp ds-get "hf://tazarov/chroma-qna?split=train" | cdp import "http://localhost:8000/default_database/chroma-qna" --upsert --create`
-        Read more about pipelines: https://datapipes.chromadb.dev/
+      The pipeline to run. Example:
+      `cdp ds-get "hf://tazarov/chroma-qna?split=train" | cdp import "http://localhost:8000/default_database/chroma-qna" --upsert --create`
+      Read more about pipelines: https://datapipes.chromadb.dev/
     required: true
     type: string
+  with-embeddings-support:
+    description: |
+      Enables all embedding providers - openai, cohere, sentence-transformers. Disabled by default.
+    type: boolean
+    default: false
+  with-docs-support:
+    description: |
+      Enables support for document embeddings. Disabled by default.
+    type: boolean
+    default: false
+  with-web-support:
+    description: |
+      Enables support for web embeddings. Disabled by default.
+    type: boolean
+    default: false
 outputs:
   result:
     description: "Result of the action"
     value: ${{ steps.run.outputs.result }}
 
 runs:
-  using: docker
-  image: docker://ghcr.io/amikos-tech/chromadb-data-pipes/cdp:latest
-  args:
-    - ${{ inputs.pipeline }}
+  using: composite
+  steps:
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Install poetry
+      run: |
+        set -e
+        python -m pip install --upgrade pip
+        curl -sSL https://install.python-poetry.org | python3 -
+      shell: bash
+    - name: Install cdp
+      run: |
+        set -e
+        poetry config virtualenvs.create false
+        poetry install
+        if [ "${{ inputs.with_embeddings_support }}" = "true" ]; then
+          poetry install --extras "embeddings"
+        fi
+        if [ "${{ inputs.with_docs_support }}" = "true" ]; then
+          poetry install --extras "docs"
+        fi
+        if [ "${{ inputs.with_web_support }}" = "true" ]; then
+          poetry install --extras "web"
+        fi
+      shell: bash
+    - name: Run cdp
+      id: run
+      run: |
+          set -e
+          poetry run ${{ inputs.pipeline }}
+      shell: bash
