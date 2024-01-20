@@ -36,6 +36,7 @@ runs:
       with:
         python-version: '3.9'
     - name: Install cdp
+      shell: bash
       run: |
         set -e
         pip install chromadb-data-pipes
@@ -50,6 +51,7 @@ runs:
         fi
     - name: Run cdp
       id: run
+      shell: bash
       run: |
           set -e
           poetry run ${{ inputs.pipeline }}
