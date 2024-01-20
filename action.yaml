@@ -15,6 +15,6 @@ outputs:
 
 runs:
   using: docker
-  image: ghcr.io/amikos-tech/chromadb-data-pipes/cdp:latest
+  image: docker://ghcr.io/amikos-tech/chromadb-data-pipes/cdp:latest
   args:
     - ${{ inputs.pipeline }}
